@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>办公用品申领管理平台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#2563EB;--primary-light:#3B82F6;--primary-dark:#1D4ED8;
+  --bg:#F5F7FA;--card:#fff;--text:#1F2937;--text-sec:#6B7280;
+  --border:#E5E7EB;--radius:12px;
+  --st-review:#2563EB;--st-recheck:#F59E0B;--st-delivery:#8B5CF6;
+  --st-receive:#14B8A6;--st-done:#10B981;--st-reject:#EF4444;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ===== 登录页 ===== */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#EFF6FF 0%,#F5F7FA 60%)}
+.login-card{background:#fff;border-radius:20px;padding:38px 34px;width:100%;max-width:420px;box-shadow:0 10px 40px rgba(37,99,235,.12)}
+.login-logo{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;margin:0 auto 16px}
+.login-card h1{font-size:21px;text-align:center;margin-bottom:4px}
+.login-card .sub{font-size:13px;color:var(--text-sec);text-align:center;margin-bottom:24px}
+.login-card input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;margin-bottom:14px;outline:none;font-family:inherit}
+.login-card input:focus{border-color:var(--primary)}
+.btn{border:none;cursor:pointer;border-radius:10px;font-weight:700;transition:.2s;font-family:inherit}
+.btn-main{background:var(--primary);color:#fff;padding:12px;width:100%;font-size:15px}
+.btn-main:hover{background:var(--primary-dark)}
+.demo-box{margin-top:22px;border-top:1px dashed var(--border);padding-top:16px}
+.demo-box h4{font-size:12px;color:var(--text-sec);margin-bottom:8px;text-align:center}
+.demo-box table{width:100%;font-size:12px;border-collapse:collapse}
+.demo-box td{padding:5px 6px;border-bottom:1px solid #F3F4F6;color:var(--text-sec)}
+.demo-box td:first-child{color:var(--text);font-weight:600}
+.demo-box .acct{cursor:pointer;color:var(--primary)}
+
+/* ===== 主框架 ===== */
+#main{display:none}
+.topbar{position:sticky;top:0;z-index:50;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:16px;padding:0 20px;height:56px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;white-space:nowrap}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff}
+nav#nav{display:flex;gap:2px;flex:1;overflow-x:auto}
+.nav-btn{background:none;border:none;padding:8px 14px;font-size:14px;color:var(--text-sec);cursor:pointer;border-radius:8px;font-family:inherit;white-space:nowrap}
+.nav-btn:hover{background:#EFF6FF;color:var(--primary)}
+.nav-btn.on{background:#EFF6FF;color:var(--primary);font-weight:700}
+.user-area{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.user-name{font-size:13px;font-weight:600}
+.user-role{font-size:11px;color:var(--primary);background:#EFF6FF;padding:2px 8px;border-radius:10px}
+.bell{position:relative;cursor:pointer;font-size:19px}
+.badge{position:absolute;top:-6px;right:-10px;background:var(--st-reject);color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700}
+.btn-exit{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text-sec);cursor:pointer;font-family:inherit}
+.btn-exit:hover{border-color:var(--st-reject);color:var(--st-reject)}
+.content{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+
+/* ===== 通用组件 ===== */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-bottom:16px}
+.card h3{font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h3 .cnt{font-size:12px;color:var(--text-sec);font-weight:400}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.toolbar select,.toolbar input{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff}
+.btn-sm{background:var(--primary);color:#fff;padding:8px 16px;font-size:13px;border-radius:8px}
+.btn-sm:hover{background:var(--primary-dark)}
+.btn-line{background:#fff;color:var(--text-sec);border:1.5px solid var(--border);padding:8px 16px;font-size:13px;border-radius:8px}
+.btn-line:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:#fff;color:var(--st-reject);border:1.5px solid #FECACA;padding:8px 16px;font-size:13px;border-radius:8px}
+.btn-danger:hover{background:#FEF2F2}
+.empty{text-align:center;padding:36px 16px;color:var(--text-sec);font-size:13px}
+.st-tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px}
+.st-pending_review{background:#DBEAFE;color:var(--st-review)}
+.st-pending_recheck{background:#FEF3C7;color:#B45309}
+.st-pending_delivery{background:#EDE9FE;color:var(--st-delivery)}
+.st-pending_receive{background:#CCFBF1;color:#0F766E}
+.st-completed{background:#D1FAE5;color:#047857}
+.st-rejected{background:#FEE2E2;color:var(--st-reject)}
+.lvl-small{background:#F3F4F6;color:var(--text-sec)}
+.lvl-large{background:#FEF3C7;color:#B45309}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{background:#F9FAFB;text-align:left;padding:10px 10px;color:var(--text-sec);font-weight:600;white-space:nowrap}
+table.tbl td{padding:10px 10px;border-bottom:1px solid #F3F4F6;vertical-align:middle}
+table.tbl tr:hover td{background:#FAFBFF}
+.rowlink{color:var(--primary);cursor:pointer;font-weight:600}
+.money{color:var(--st-reject);font-weight:700}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(31,41,55,.93);color:#fff;padding:11px 24px;border-radius:10px;font-size:14px;z-index:999;transition:.3s;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ===== 工作台概览 ===== */
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.ov-item{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);cursor:pointer;transition:.2s}
+.ov-item:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(37,99,235,.12)}
+.ov-num{font-size:26px;font-weight:800;margin-bottom:2px}
+.ov-lab{font-size:12px;color:var(--text-sec)}
+
+/* ===== 新建申领 ===== */
+.item-row{display:grid;grid-template-columns:1fr 130px 110px;gap:10px;align-items:center;padding:10px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;font-size:13px}
+.item-row .nm{font-weight:600}
+.item-row .sp{color:var(--text-sec);font-size:12px;margin-top:2px}
+.item-row input{width:64px;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;outline:none;text-align:center}
+.item-row .sub{color:var(--st-reject);font-weight:700;text-align:right}
+.sum-bar{display:flex;justify-content:space-between;align-items:center;background:#EFF6FF;border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14px}
+.sum-bar b{font-size:20px;color:var(--primary)}
+.txtarea{width:100%;min-height:64px;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;outline:none;resize:vertical}
+.txtarea:focus{border-color:var(--primary)}
+
+/* ===== 详情弹窗 ===== */
+.mask{display:none;position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:100;align-items:flex-start;justify-content:center;padding:28px 16px;overflow-y:auto}
+.mask.show{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:640px;width:100%;animation:popIn .22s ease;margin:auto 0}
+@keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px 0}
+.modal-head h3{font-size:17px}
+.modal-x{cursor:pointer;font-size:18px;color:var(--text-sec);padding:4px}
+.modal-body{padding:16px 22px 22px}
+.kv{display:grid;grid-template-columns:88px 1fr;gap:6px 10px;font-size:13px;margin-bottom:14px}
+.kv .k{color:var(--text-sec)}
+.tl{border-left:2px solid #E5E7EB;margin:8px 0 4px 6px;padding-left:16px}
+.tl-item{position:relative;padding-bottom:14px;font-size:13px}
+.tl-item::before{content:"";position:absolute;left:-21px;top:4px;width:8px;height:8px;border-radius:50%;background:#CBD5E1}
+.tl-item.last::before{background:var(--primary)}
+.tl-item .t{color:var(--text-sec);font-size:12px}
+.tl-item .op{font-weight:600;margin-bottom:2px}
+.tl-item .cm{color:#B45309;background:#FEF3C7;border-radius:6px;padding:3px 8px;display:inline-block;font-size:12px;margin-top:3px}
+
+/* ===== 待办下拉 ===== */
+.todo-pop{position:absolute;top:50px;right:16px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:14px 18px;z-index:60;min-width:220px;font-size:13px}
+.todo-pop h4{font-size:13px;margin-bottom:8px}
+.todo-pop .li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #F3F4F6;cursor:pointer}
+.todo-pop .li:hover{color:var(--primary)}
+.todo-pop .li b{color:var(--st-reject)}
+
+/* ===== 报表 ===== */
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.bar-row{display:grid;grid-template-columns:110px 1fr 90px;gap:8px;align-items:center;font-size:13px;margin-bottom:9px}
+.bar-track{height:18px;background:#F3F4F6;border-radius:9px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:9px;min-width:2px}
+.bar-val{text-align:right;color:var(--text-sec);font-size:12px;white-space:nowrap}
+
+/* ===== 超管表单 ===== */
+.frm-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.frm-g{margin-bottom:12px}
+.frm-g label{display:block;font-size:12px;font-weight:700;color:var(--text-sec);margin-bottom:5px}
+.frm-g input,.frm-g select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff}
+.frm-g input:focus,.frm-g select:focus{border-color:var(--primary)}
+.tag-role{font-size:11px;padding:2px 8px;border-radius:10px;background:#EFF6FF;color:var(--primary);font-weight:700}
+.hint{font-size:12px;color:var(--text-sec);background:#F9FAFB;border-radius:8px;padding:10px 14px;margin-top:10px;line-height:1.7}
+
+@media(max-width:700px){
+  .topbar{flex-wrap:wrap;height:auto;padding:8px 12px;gap:8px}
+  nav#nav{order:3;width:100%}
+  .content{padding:14px 10px 60px}
+  .frm-row{grid-template-columns:1fr}
+  .item-row{grid-template-columns:1fr 90px 80px}
+  table.tbl{font-size:12px}
+  .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div class="login-wrap" id="page-login">
+  <div class="login-card">
+    <div class="login-logo">📦</div>
+    <h1>办公用品申领管理平台</h1>
+    <p class="sub">多组织 · 四级审批 · 全流程留痕</p>
+    <input id="loginAccount" placeholder="账号" onkeydown="if(event.key==='Enter')doLogin()">
+    <input id="loginPwd" type="password" placeholder="密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-main" onclick="doLogin()">登 录</button>
+    <div class="demo-box">
+      <h4>演示账号（点击自动填充）</h4>
+      <table>
+        <tr><td>员工</td><td class="acct" onclick="fillAcct('zhangsan','123456')">zhangsan / 123456</td></tr>
+        <tr><td>部门负责人</td><td class="acct" onclick="fillAcct('zhao','123456')">zhao / 123456</td></tr>
+        <tr><td>分公司管理员</td><td class="acct" onclick="fillAcct('qian','123456')">qian / 123456</td></tr>
+        <tr><td>集团超管</td><td class="acct" onclick="fillAcct('admin','admin123')">admin / admin123</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 主框架 -->
+<div id="main">
+  <header class="topbar">
+    <div class="logo"><div class="logo-icon">📦</div>办公用品申领平台</div>
+    <nav id="nav"></nav>
+    <div class="user-area">
+      <div class="bell" onclick="toggleTodoPop()" title="待办提醒">🔔<span class="badge" id="todoBadge" style="display:none"></span></div>
+      <span class="user-name" id="userName"></span>
+      <span class="user-role" id="userRole"></span>
+      <button class="btn-exit" onclick="logout()">退出</button>
+    </div>
+  </header>
+  <main class="content" id="content"></main>
+</div>
+
+<!-- 新建申领弹窗 -->
+<div class="mask" id="maskNew" onclick="if(event.target===this)closeMask('maskNew')">
+  <div class="modal">
+    <div class="modal-head"><h3>🆕 新建申领单</h3><div class="modal-x" onclick="closeMask('maskNew')">✕</div></div>
+    <div class="modal-body" id="newBody"></div>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="mask" id="maskDetail" onclick="if(event.target===this)closeMask('maskDetail')">
+  <div class="modal">
+    <div class="modal-head"><h3 id="detailTitle"></h3><div class="modal-x" onclick="closeMask('maskDetail')">✕</div></div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- 驳回弹窗 -->
+<div class="mask" id="maskReject" onclick="if(event.target===this)closeMask('maskReject')">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h3>驳回申领单</h3><div class="modal-x" onclick="closeMask('maskReject')">✕</div></div>
+    <div class="modal-body">
+      <div class="frm-g"><label>驳回理由（必填）</label><textarea class="txtarea" id="rejectReason" placeholder="请说明驳回原因，员工修改后可重新提交"></textarea></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-line" onclick="closeMask('maskReject')">取消</button>
+        <button class="btn btn-danger" onclick="confirmReject()">确认驳回</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+ * 数据层（演示模式：localStorage 模拟云数据库）
+ * 真实部署：将 DB 对象内部实现替换为 Supabase/Firebase/LeanCloud，
+ * 接口签名不变（seed/loadUsers/loadRequests/saveRequest/...）
+ * ================================================================ */
+var DB = {
+  KEY: 'supplies_db_v1',
+  read: function(){ try{ return JSON.parse(localStorage.getItem(this.KEY)) || null; }catch(e){ return null; } },
+  write: function(db){ localStorage.setItem(this.KEY, JSON.stringify(db)); },
+  ensure: function(){
+    var db = this.read();
+    if(!db){ db = {settings:{threshold:200}, orgs:[], depts:[], users:[], items:[], requests:[], seq:1}; this.seed(db); this.write(db); }
+    return db;
+  },
+  seed: function(db){
+    var T = function(daysAgo, h){ var d = new Date(Date.now() - daysAgo*86400000); d.setHours(h||10,0,0,0); return d.getTime(); };
+    db.orgs = [
+      {id:'org1', name:'南京分公司', status:'active'},
+      {id:'org2', name:'苏州分公司', status:'active'}
+    ];
+    db.depts = [
+      {id:'d1', orgId:'org1', name:'综合部', status:'active'},
+      {id:'d2', orgId:'org1', name:'技术部', status:'active'},
+      {id:'d3', orgId:'org2', name:'技术部', status:'active'},
+      {id:'d4', orgId:'org2', name:'市场部', status:'active'}
+    ];
+    db.users = [
+      {id:'u1', name:'张三', account:'zhangsan', pwd:'123456', role:'employee',   orgId:'org1', deptId:'d2', status:'active'},
+      {id:'u2', name:'李四', account:'lisi',     pwd:'123456', role:'employee',   orgId:'org1', deptId:'d1', status:'active'},
+      {id:'u3', name:'王五', account:'wangwu',   pwd:'123456', role:'employee',   orgId:'org2', deptId:'d3', status:'active'},
+      {id:'u4', name:'赵部长', account:'zhao',   pwd:'123456', role:'leader',     orgId:'org1', deptId:'d2', status:'active'},
+      {id:'u5', name:'钱经理', account:'qian',   pwd:'123456', role:'branch_admin', orgId:'org1', deptId:'', status:'active'},
+      {id:'u6', name:'孙经理', account:'sun',    pwd:'123456', role:'branch_admin', orgId:'org2', deptId:'', status:'active'},
+      {id:'u7', name:'集团管理员', account:'admin', pwd:'admin123', role:'super_admin', orgId:'', deptId:'', status:'active'}
+    ];
+    db.items = [
+      {id:'i1',  name:'中性签字笔', spec:'0.5mm 黑色', price:2.5,  unit:'支', status:'active'},
+      {id:'i2',  name:'笔记本',     spec:'B5 80页',    price:8.0,  unit:'本', status:'active'},
+      {id:'i3',  name:'便笺纸',     spec:'76×76mm',    price:3.0,  unit:'本', status:'active'},
+      {id:'i4',  name:'文件夹',     spec:'A4 双强力',  price:2.8,  unit:'个', status:'active'},
+      {id:'i5',  name:'A4复印纸',   spec:'70g 500张',  price:22.0, unit:'包', status:'active'},
+      {id:'i6',  name:'订书机',     spec:'中号',       price:15.0, unit:'个', status:'active'},
+      {id:'i7',  name:'胶带',       spec:'宽45mm',     price:4.5,  unit:'卷', status:'active'},
+      {id:'i8',  name:'白板笔',     spec:'可擦 黑色',  price:5.0,  unit:'支', status:'active'},
+      {id:'i9',  name:'电池',       spec:'5号 4节装',  price:8.0,  unit:'盒', status:'active'},
+      {id:'i10', name:'鼠标垫',     spec:'加厚防滑',   price:12.0, unit:'张', status:'active'}
+    ];
+    /* 演示申领单：覆盖全部六种状态 */
+    db.requests = [
+      { id:'r1', no:'SL20260916001', userId:'u1', userName:'张三', orgId:'org1', deptId:'d2',
+        items:[{name:'中性签字笔',spec:'0.5mm 黑色',price:2.5,qty:10},{name:'便笺纸',spec:'76×76mm',price:3.0,qty:2}],
+        total:31, purpose:'部门日常办公补充', status:'pending_review', level:'small', version:1, createdAt:T(2,9),
+        logs:[{action:'提交',by:'张三',role:'employee',comment:'',time:T(2,9)}] },
+      { id:'r2', no:'SL20260916002', userId:'u1', userName:'张三', orgId:'org1', deptId:'d2',
+        items:[{name:'A4复印纸',spec:'70g 500张',price:22.0,qty:5},{name:'文件夹',spec:'A4 双强力',price:2.8,qty:20}],
+        total:166, purpose:'项目资料打印归档', status:'pending_review', level:'small', version:1, createdAt:T(2,14),
+        logs:[{action:'提交',by:'张三',role:'employee',comment:'',time:T(2,14)}] },
+      { id:'r3', no:'SL20260915003', userId:'u1', userName:'张三', orgId:'org1', deptId:'d2',
+        items:[{name:'笔记本',spec:'B5 80页',price:8.0,qty:30},{name:'订书机',spec:'中号',price:15.0,qty:5},{name:'胶带',spec:'宽45mm',price:4.5,qty:10}],
+        total:345, purpose:'技术部新员工入职文具包', status:'pending_recheck', level:'large', version:1, createdAt:T(3,9),
+        logs:[{action:'提交',by:'张三',role:'employee',comment:'',time:T(3,9)},
+              {action:'初审通过',by:'赵部长',role:'leader',comment:'',time:T(3,11)}] },
+      { id:'r4', no:'SL20260914004', userId:'u2', userName:'李四', orgId:'org1', deptId:'d1',
+        items:[{name:'白板笔',spec:'可擦 黑色',price:5.0,qty:12},{name:'电池',spec:'5号 4节装',price:8.0,qty:6}],
+        total:108, purpose:'会议室白板笔更换', status:'pending_delivery', level:'small', version:1, createdAt:T(4,10),
+        logs:[{action:'提交',by:'李四',role:'employee',comment:'',time:T(4,10)},
+              {action:'初审通过',by:'钱经理',role:'leader',comment:'',time:T(4,15)}] },
+      { id:'r5', no:'SL20260913005', userId:'u2', userName:'李四', orgId:'org1', deptId:'d1',
+        items:[{name:'中性签字笔',spec:'0.5mm 黑色',price:2.5,qty:20},{name:'笔记本',spec:'B5 80页',price:8.0,qty:10}],
+        total:130, purpose:'综合部前台用笔补充', status:'pending_receive', level:'small', version:1, createdAt:T(5,9),
+        logs:[{action:'提交',by:'李四',role:'employee',comment:'',time:T(5,9)},
+              {action:'初审通过',by:'钱经理',role:'leader',comment:'',time:T(5,10)},
+              {action:'已发放',by:'钱经理',role:'branch_admin',comment:'物品已放前台，请来领取',time:T(5,14)}] },
+      { id:'r6', no:'SL20260910006', userId:'u1', userName:'张三', orgId:'org1', deptId:'d2',
+        items:[{name:'鼠标垫',spec:'加厚防滑',price:12.0,qty:8}],
+        total:96, purpose:'办公电脑外设更换', status:'completed', level:'small', version:1, createdAt:T(8,9),
+        logs:[{action:'提交',by:'张三',role:'employee',comment:'',time:T(8,9)},
+              {action:'初审通过',by:'赵部长',role:'leader',comment:'',time:T(8,10)},
+              {action:'已发放',by:'钱经理',role:'branch_admin',comment:'',time:T(8,15)},
+              {action:'确认领取',by:'张三',role:'employee',comment:'',time:T(8,16)}] },
+      { id:'r7', no:'SL20260912007', userId:'u2', userName:'李四', orgId:'org1', deptId:'d1',
+        items:[{name:'A4复印纸',spec:'70g 500张',price:22.0,qty:20}],
+        total:440, purpose:'打印标书用纸', status:'rejected', level:'large', version:1, createdAt:T(6,9),
+        logs:[{action:'提交',by:'李四',role:'employee',comment:'',time:T(6,9)},
+              {action:'初审通过',by:'钱经理',role:'leader',comment:'',time:T(6,10)},
+              {action:'复审驳回',by:'钱经理',role:'branch_admin',comment:'数量过大，请先核实实际需求量后分批申领',time:T(6,11)}] }
+    ];
+  },
+  /* ---- 通用访问接口 ---- */
+  loadSettings: function(){ return this.ensure().settings; },
+  saveSettings: function(s){ var db = this.ensure(); db.settings = s; this.write(db); },
+  loadOrgs: function(){ return this.ensure().orgs; },
+  loadDepts: function(){ return this.ensure().depts; },
+  loadUsers: function(){ return this.ensure().users; },
+  saveUser: function(u){ var db = this.ensure(); var f = db.users.find(function(x){return x.id===u.id;}); if(f){ Object.assign(f,u); } else { db.users.push(u); } this.write(db); },
+  loadItems: function(){ return this.ensure().items.filter(function(i){return i.status==='active';}); },
+  saveItem: function(it){ var db = this.ensure(); var f = db.items.find(function(x){return x.id===it.id;}); if(f){ Object.assign(f,it); } else { db.items.push(it); } this.write(db); },
+  loadRequests: function(){ return this.ensure().requests; },
+  saveRequest: function(r){ var db = this.ensure(); var f = db.requests.find(function(x){return x.id===r.id;}); if(f){ Object.assign(f,r); } else { db.requests.push(r); } this.write(db); },
+  nextNo: function(){ var db = this.ensure(); db.seq++; this.write(db); return 'SL' + new Date().toISOString().slice(0,10).replace(/-/g,'') + String(db.seq).padStart(3,'0'); },
+  newId: function(p){ return (p||'id') + Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+};
+
+/* ==================== 工具函数 ==================== */
+var ROLE_TEXT = {employee:'员工', leader:'部门负责人', branch_admin:'分公司管理员', super_admin:'集团超管'};
+var ST_TEXT = {pending_review:'待初审', pending_recheck:'待复审', pending_delivery:'待发放', pending_receive:'待领取', completed:'已完成', rejected:'已驳回'};
+var ST_ICON = {pending_review:'📝', pending_recheck:'🔎', pending_delivery:'📦', pending_receive:'🤝', completed:'✅', rejected:'❌'};
+function fmtTime(ts){ var d = new Date(ts); var p = function(n){return n<10?'0'+n:n;}; return (d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); }
+function fmtMoney(n){ return '¥' + (Math.round(n*100)/100).toFixed(2); }
+function toast(msg){ var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._tm); t._tm = setTimeout(function(){ t.classList.remove('show'); }, 2200); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function orgName(id){ var o = DB.loadOrgs().find(function(x){return x.id===id;}); return o ? o.name : '-'; }
+function deptName(id){ var d = DB.loadDepts().find(function(x){return x.id===id;}); return d ? d.name : '-'; }
+function openMask(id){ document.getElementById(id).classList.add('show'); }
+function closeMask(id){ document.getElementById(id).classList.remove('show'); }
+function csvExport(rows, filename){
+  var csv = '\uFEFF' + rows.map(function(r){ return r.map(function(c){ return '"' + String(c==null?'':c).replace(/"/g,'""') + '"'; }).join(','); }).join('\r\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = filename; a.click();
+}
+/* ==================== 会话与登录 ==================== */
+var CU = null; // current user
+function fillAcct(a, p){ document.getElementById('loginAccount').value = a; document.getElementById('loginPwd').value = p; }
+function doLogin(){
+  var a = document.getElementById('loginAccount').value.trim();
+  var p = document.getElementById('loginPwd').value;
+  var u = DB.loadUsers().find(function(x){ return x.account === a && x.pwd === p && x.status === 'active'; });
+  if(!u){ toast('账号或密码错误'); return; }
+  CU = u;
+  sessionStorage.setItem('supplies_uid', u.id);
+  document.getElementById('page-login').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  document.getElementById('userName').textContent = u.name;
+  document.getElementById('userRole').textContent = ROLE_TEXT[u.role];
+  buildNav();
+  toast('欢迎，' + u.name + '（' + ROLE_TEXT[u.role] + '）');
+  route(NAVS[u.role][0].key);
+}
+function logout(){ CU = null; sessionStorage.removeItem('supplies_uid'); document.getElementById('main').style.display = 'none'; document.getElementById('page-login').style.display = 'flex'; closeTodoPop(); }
+
+/* ==================== 导航 ==================== */
+var NAVS = {
+  employee: [ {key:'empHome', txt:'工作台'}, {key:'empMine', txt:'我的申领'} ],
+  leader: [ {key:'ldrHome', txt:'审批工作台'} ],
+  branch_admin: [ {key:'brHome', txt:'审批与发放'}, {key:'brReport', txt:'本单位报表'} ],
+  super_admin: [ {key:'spReport', txt:'全局报表'}, {key:'spOrg', txt:'组织管理'}, {key:'spUser', txt:'用户管理'}, {key:'spItem', txt:'物品管理'}, {key:'spRule', txt:'审批规则'} ]
+};
+var curPage = '';
+function buildNav(){
+  var nav = document.getElementById('nav');
+  nav.innerHTML = NAVS[CU.role].map(function(n){
+    return '<button class="nav-btn" id="nav-' + n.key + '" onclick="route(\'' + n.key + '\')">' + n.txt + '</button>';
+  }).join('');
+}
+function route(key){
+  curPage = key;
+  var btns = document.querySelectorAll('.nav-btn');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('on');
+  var b = document.getElementById('nav-' + key);
+  if(b) b.classList.add('on');
+  closeTodoPop();
+  if(key === 'empHome') renderEmpHome();
+  else if(key === 'empMine') renderEmpMine();
+  else if(key === 'ldrHome') renderLeader();
+  else if(key === 'brHome') renderBranch();
+  else if(key === 'brReport') renderReport('branch');
+  else if(key === 'spReport') renderReport('super');
+  else if(key === 'spOrg') renderOrgMgmt();
+  else if(key === 'spUser') renderUserMgmt();
+  else if(key === 'spItem') renderItemMgmt();
+  else if(key === 'spRule') renderRuleMgmt();
+  refreshBadge();
+  window.scrollTo(0,0);
+}
+
+/* ==================== 待办计算与红点 ==================== */
+function myTodos(){
+  if(!CU) return [];
+  var t = [];
+  if(CU.role === 'employee'){
+    DB.loadRequests().forEach(function(r){
+      if(r.userId === CU.id && r.status === 'rejected') t.push({txt:'被驳回待重提', n:1, key:'empMine'});
+      if(r.userId === CU.id && r.status === 'pending_receive') t.push({txt:'待领取确认', n:1, key:'empMine'});
+    });
+  } else if(CU.role === 'leader'){
+    var n = DB.loadRequests().filter(function(r){ return r.status === 'pending_review' && r.orgId === CU.orgId && r.deptId === CU.deptId; }).length;
+    if(n) t.push({txt:'待初审单据', n:n, key:'ldrHome'});
+  } else if(CU.role === 'branch_admin'){
+    var a = DB.loadRequests().filter(function(r){ return r.status === 'pending_recheck' && r.orgId === CU.orgId; }).length;
+    var b = DB.loadRequests().filter(function(r){ return r.status === 'pending_delivery' && r.orgId === CU.orgId; }).length;
+    if(a) t.push({txt:'待复审单据', n:a, key:'brHome'});
+    if(b) t.push({txt:'待发放单据', n:b, key:'brHome'});
+  }
+  // 合并同类
+  var merged = {};
+  t.forEach(function(x){ merged[x.txt] = merged[x.txt] || {txt:x.txt, n:0, key:x.key}; merged[x.txt].n += x.n; });
+  return Object.values(merged);
+}
+function refreshBadge(){
+  var todos = myTodos();
+  var total = todos.reduce(function(s,x){ return s + x.n; }, 0);
+  var badge = document.getElementById('todoBadge');
+  badge.style.display = total > 0 ? 'flex' : 'none';
+  badge.textContent = total > 99 ? '99+' : total;
+}
+function toggleTodoPop(){
+  var old = document.getElementById('todoPop');
+  if(old){ old.remove(); return; }
+  var todos = myTodos();
+  var html = '<div class="todo-pop" id="todoPop"><h4>🔔 我的待办</h4>';
+  if(!todos.length) html += '<div style="color:var(--text-sec);padding:8px 0">暂无待办事项</div>';
+  else todos.forEach(function(x){ html += '<div class="li" onclick="route(\'' + x.key + '\')"><span>' + x.txt + '</span><b>' + x.n + '</b></div>'; });
+  html += '</div>';
+  document.querySelector('.user-area').style.position = 'relative';
+  document.querySelector('.user-area').insertAdjacentHTML('beforeend', html);
+}
+function closeTodoPop(){ var p = document.getElementById('todoPop'); if(p) p.remove(); }
+
+/* ==================== 员工端：工作台 ==================== */
+function renderEmpHome(){
+  var reqs = DB.loadRequests().filter(function(r){ return r.userId === CU.id; });
+  var cnt = function(st){ return reqs.filter(function(r){ return r.status === st; }).length; };
+  var html =
+    '<div class="ov-grid">' +
+    '<div class="ov-item" onclick="openNewRequest()"><div class="ov-num" style="color:var(--primary)">＋</div><div class="ov-lab">新建申领</div></div>' +
+    '<div class="ov-item" onclick="route(\'empMine\')"><div class="ov-num" style="color:var(--st-review)">' + cnt('pending_review') + '</div><div class="ov-lab">待初审</div></div>' +
+    '<div class="ov-item" onclick="route(\'empMine\')"><div class="ov-num" style="color:#B45309">' + cnt('pending_recheck') + '</div><div class="ov-lab">待复审</div></div>' +
+    '<div class="ov-item" onclick="route(\'empMine\')"><div class="ov-num" style="color:var(--st-delivery)">' + cnt('pending_delivery') + '</div><div class="ov-lab">待发放</div></div>' +
+    '<div class="ov-item" onclick="route(\'empMine\')"><div class="ov-num" style="color:var(--st-receive)">' + cnt('pending_receive') + '</div><div class="ov-lab">待领取</div></div>' +
+    '<div class="ov-item" onclick="route(\'empMine\')"><div class="ov-num" style="color:var(--st-done)">' + cnt('completed') + '</div><div class="ov-lab">已完成</div></div>' +
+    '</div>' +
+    '<div class="card"><h3>📋 进行中的申领</h3>' + empReqTable(reqs.filter(function(r){ return ['pending_review','pending_recheck','pending_delivery','pending_receive','rejected'].indexOf(r.status) >= 0; }), 'empHome') + '</div>';
+  document.getElementById('content').innerHTML = html;
+}
+function renderEmpMine(){
+  var reqs = DB.loadRequests().filter(function(r){ return r.userId === CU.id; }).sort(function(a,b){ return b.createdAt - a.createdAt; });
+  var html = '<div class="card"><h3>📄 我的申领 <span class="cnt">共 ' + reqs.length + ' 单</span></h3>' +
+    '<div class="toolbar"><select id="fSt" onchange="renderEmpMine()">' +
+    '<option value="">全部状态</option>' + Object.keys(ST_TEXT).map(function(k){ return '<option value="' + k + '"' + (document.getElementById('fSt') && document.getElementById('fSt').value === k ? ' selected' : '') + '>' + ST_TEXT[k] + '</option>'; }).join('') +
+    '</select></div><div id="mineList"></div></div>';
+  document.getElementById('content').innerHTML = html;
+  var f = '';
+  document.getElementById('fSt').onchange = function(){ f = this.value; draw(); };
+  function draw(){
+    var list = f ? reqs.filter(function(r){ return r.status === f; }) : reqs;
+    document.getElementById('mineList').innerHTML = empReqTable(list, 'empMine');
+  }
+  draw();
+}
+function empReqTable(list, from){
+  if(!list.length) return '<div class="empty">暂无单据</div>';
+  return '<table class="tbl"><tr><th>单号</th><th class="hide-m">物品</th><th>金额</th><th>级别</th><th>状态</th><th class="hide-m">提交时间</th><th></th></tr>' +
+    list.map(function(r){
+      var goods = r.items.map(function(i){ return i.name + '×' + i.qty; }).join('、');
+      var act = '';
+      if(r.status === 'pending_receive') act = '<button class="btn btn-sm" onclick="confirmReceive(\'' + r.id + '\')">确认领取</button>';
+      else if(r.status === 'rejected') act = '<button class="btn btn-sm" onclick="openResubmit(\'' + r.id + '\')">修改重提</button>';
+      return '<tr><td><span class="rowlink" onclick="openDetail(\'' + r.id + '\')">' + r.no + (r.version > 1 ? ' <span style="font-size:11px;color:var(--text-sec)">v' + r.version + '</span>' : '') + '</span></td>' +
+        '<td class="hide-m" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(goods) + '</td>' +
+        '<td class="money">' + fmtMoney(r.total) + '</td>' +
+        '<td><span class="st-tag lvl-' + r.level + '">' + (r.level === 'small' ? '小额' : '大额') + '</span></td>' +
+        '<td><span class="st-tag st-' + r.status + '">' + ST_ICON[r.status] + ' ' + ST_TEXT[r.status] + '</span></td>' +
+        '<td class="hide-m">' + fmtTime(r.createdAt) + '</td><td>' + act + '</td></tr>';
+    }).join('') + '</table>';
+}
+
+/* ==================== 员工端：新建申领 ==================== */
+var draft = {};
+function openNewRequest(){
+  var items = DB.loadItems();
+  draft = { qtys: {}, purpose: '' };
+  var rows = items.map(function(it){
+    return '<div class="item-row"><div><div class="nm">' + esc(it.name) + ' <span style="color:var(--text-sec);font-weight:400">' + fmtMoney(it.price) + '/' + it.unit + '</span></div><div class="sp">' + esc(it.spec || '') + '</div></div>' +
+      '<div style="text-align:center"><input type="number" min="0" value="0" data-id="' + it.id + '" onchange="setQty(\'' + it.id + '\', this.value)"> <span style="font-size:12px;color:var(--text-sec)">' + it.unit + '</span></div>' +
+      '<div class="sub" id="sub-' + it.id + '">¥0.00</div></div>';
+  }).join('');
+  document.getElementById('newBody').innerHTML =
+    '<div style="max-height:340px;overflow-y:auto;margin-bottom:6px">' + rows + '</div>' +
+    '<div class="sum-bar"><span>预估金额合计（阈值 ' + fmtMoney(DB.loadSettings().threshold) + '，超过走完整审批链）</span><b id="sumTotal">¥0.00</b></div>' +
+    '<div class="frm-g"><label>用途说明（必填）</label><textarea class="txtarea" id="purpose" placeholder="请填写申领用途"></textarea></div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-line" onclick="closeMask(\'maskNew\')">取消</button><button class="btn btn-main" style="width:auto;padding:12px 32px" onclick="submitRequest()">提交申领</button></div>';
+  openMask('maskNew');
+}
+function setQty(id, v){
+  var n = Math.max(0, parseInt(v) || 0);
+  draft.qtys[id] = n;
+  var it = DB.loadItems().find(function(x){ return x.id === id; });
+  document.getElementById('sub-' + id).textContent = fmtMoney(it.price * n);
+  calcSum();
+}
+function calcSum(){
+  var items = DB.loadItems(); var sum = 0;
+  items.forEach(function(it){ sum += (draft.qtys[it.id] || 0) * it.price; });
+  document.getElementById('sumTotal').textContent = fmtMoney(sum);
+  return sum;
+}
+function submitRequest(){
+  var purpose = document.getElementById('purpose').value.trim();
+  if(!purpose){ toast('请填写用途说明'); return; }
+  var items = DB.loadItems();
+  var sel = [];
+  items.forEach(function(it){
+    var q = draft.qtys[it.id] || 0;
+    if(q > 0) sel.push({ name: it.name, spec: it.spec, price: it.price, qty: q });
+  });
+  if(!sel.length){ toast('请至少选择一种物品'); return; }
+  var total = sel.reduce(function(s,i){ return s + i.price * i.qty; }, 0);
+  var th = DB.loadSettings().threshold;
+  var r = {
+    id: DB.newId('r'), no: DB.nextNo(), userId: CU.id, userName: CU.name, orgId: CU.orgId, deptId: CU.deptId,
+    items: sel, total: total, purpose: purpose, status: 'pending_review',
+    level: total <= th ? 'small' : 'large', version: 1, createdAt: Date.now(),
+    logs: [{ action: '提交', by: CU.name, role: 'employee', comment: '', time: Date.now() }]
+  };
+  DB.saveRequest(r);
+  closeMask('maskNew');
+  toast('提交成功！' + (r.level === 'small' ? '小额单据，仅需部门初审' : '大额单据，将走完整审批链'));
+  route('empHome');
+}
+
+/* ==================== 申领详情 ==================== */
+function openDetail(id){
+  var r = DB.loadRequests().find(function(x){ return x.id === id; });
+  if(!r) return;
+  document.getElementById('detailTitle').textContent = '单据 ' + r.no;
+  var goods = '<table class="tbl"><tr><th>物品</th><th>规格</th><th>单价</th><th>数量</th><th>小计</th></tr>' +
+    r.items.map(function(i){ return '<tr><td>' + esc(i.name) + '</td><td class="hide-m">' + esc(i.spec || '-') + '</td><td>' + fmtMoney(i.price) + '</td><td>' + i.qty + '</td><td class="money">' + fmtMoney(i.price * i.qty) + '</td></tr>'; }).join('') +
+    '<tr><td colspan="4" style="text-align:right;font-weight:700">合计</td><td class="money">' + fmtMoney(r.total) + '</td></tr></table>';
+  var tl = '<div class="tl">' + r.logs.map(function(l, i){
+    var last = i === r.logs.length - 1;
+    return '<div class="tl-item' + (last ? ' last' : '') + '"><div class="op">' + esc(l.action) + ' · ' + esc(l.by) + '（' + ROLE_TEXT[l.role] + '）</div><div class="t">' + fmtTime(l.time) + '</div>' + (l.comment ? '<div class="cm">💬 ' + esc(l.comment) + '</div>' : '') + '</div>';
+  }).join('') + '</div>';
+  document.getElementById('detailBody').innerHTML =
+    '<div class="kv"><span class="k">申领人</span><span>' + esc(r.userName) + '</span>' +
+    '<span class="k">所属</span><span>' + esc(orgName(r.orgId) + ' · ' + deptName(r.deptId)) + '</span>' +
+    '<span class="k">当前状态</span><span><span class="st-tag st-' + r.status + '">' + ST_ICON[r.status] + ' ' + ST_TEXT[r.status] + '</span></span>' +
+    '<span class="k">审批级别</span><span><span class="st-tag lvl-' + r.level + '">' + (r.level === 'small' ? '小额（≤' + DB.loadSettings().threshold + '元）' : '大额（>' + DB.loadSettings().threshold + '元）') + '</span></span>' +
+    '<span class="k">用途</span><span>' + esc(r.purpose) + '</span></div>' +
+    '<h3 style="font-size:14px;margin:10px 0 8px">📦 物品明细</h3>' + goods +
+    '<h3 style="font-size:14px;margin:16px 0 4px">🕒 流转记录（v' + r.version + '）</h3>' + tl;
+  openMask('maskDetail');
+}
+/* ==================== 部门负责人：初审工作台 ==================== */
+function renderLeader(){
+  var reqs = DB.loadRequests().filter(function(r){
+    return r.status === 'pending_review' && r.orgId === CU.orgId && r.deptId === CU.deptId;
+  }).sort(function(a,b){ return a.createdAt - b.createdAt; });
+  var cnt = reqs.length;
+  var html = '<div class="card"><h3>📝 待初审 <span class="cnt">' + esc(orgName(CU.orgId) + ' · ' + deptName(CU.deptId)) + '，共 ' + cnt + ' 单</span></h3>' +
+    (cnt ? '<table class="tbl"><tr><th>单号</th><th>申领人</th><th class="hide-m">物品</th><th>金额</th><th>级别</th><th class="hide-m">用途</th><th>提交时间</th><th style="width:170px">操作</th></tr>' +
+      reqs.map(function(r){
+        var goods = r.items.map(function(i){ return i.name + '×' + i.qty; }).join('、');
+        return '<tr><td><span class="rowlink" onclick="openDetail(\'' + r.id + '\')">' + r.no + '</span></td><td>' + esc(r.userName) + '</td>' +
+          '<td class="hide-m" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(goods) + '</td>' +
+          '<td class="money">' + fmtMoney(r.total) + '</td><td><span class="st-tag lvl-' + r.level + '">' + (r.level === 'small' ? '小额' : '大额') + '</span></td>' +
+          '<td class="hide-m" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.purpose) + '</td>' +
+          '<td class="hide-m">' + fmtTime(r.createdAt) + '</td>' +
+          '<td><button class="btn btn-sm" onclick="approve(\'' + r.id + '\',\'first\')">通过</button> <button class="btn btn-danger" onclick="openReject(\'' + r.id + '\')">驳回</button></td></tr>';
+      }).join('') + '</table>'
+    : '<div class="empty">暂无待初审单据</div>') +
+    '<div class="hint">💡 初审通过后：小额单据（≤' + DB.loadSettings().threshold + '元）直接进入「待发放」；大额单据流转至分公司管理员复审。</div></div>';
+  document.getElementById('content').innerHTML = html;
+}
+
+/* ==================== 分公司管理员：复审与发放 ==================== */
+function renderBranch(){
+  var rechecks = DB.loadRequests().filter(function(r){ return r.status === 'pending_recheck' && r.orgId === CU.orgId; }).sort(function(a,b){ return a.createdAt - b.createdAt; });
+  var deliveries = DB.loadRequests().filter(function(r){ return r.status === 'pending_delivery' && r.orgId === CU.orgId; }).sort(function(a,b){ return a.createdAt - b.createdAt; });
+  function table(list, ops){
+    if(!list.length) return '<div class="empty">暂无单据</div>';
+    return '<table class="tbl"><tr><th>单号</th><th>申领人</th><th class="hide-m">物品</th><th>金额</th><th class="hide-m">提交时间</th><th style="width:' + (ops === 'recheck' ? '170px' : '110px') + '">操作</th></tr>' +
+      list.map(function(r){
+        var goods = r.items.map(function(i){ return i.name + '×' + i.qty; }).join('、');
+        var act = ops === 'recheck'
+          ? '<button class="btn btn-sm" onclick="approve(\'' + r.id + '\',\'recheck\')">复审通过</button> <button class="btn btn-danger" onclick="openReject(\'' + r.id + '\')">驳回</button>'
+          : '<button class="btn btn-sm" onclick="markDelivered(\'' + r.id + '\')">标记已发放</button>';
+        return '<tr><td><span class="rowlink" onclick="openDetail(\'' + r.id + '\')">' + r.no + '</span></td><td>' + esc(r.userName) + '</td>' +
+          '<td class="hide-m" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(goods) + '</td>' +
+          '<td class="money">' + fmtMoney(r.total) + '</td><td class="hide-m">' + fmtTime(r.createdAt) + '</td><td>' + act + '</td></tr>';
+      }).join('') + '</table>';
+  }
+  var html =
+    '<div class="ov-grid">' +
+    '<div class="ov-item"><div class="ov-num" style="color:#B45309">' + rechecks.length + '</div><div class="ov-lab">待复审</div></div>' +
+    '<div class="ov-item"><div class="ov-num" style="color:var(--st-delivery)">' + deliveries.length + '</div><div class="ov-lab">待发放</div></div>' +
+    '</div>' +
+    '<div class="card"><h3>🔎 待复审 <span class="cnt">大额单据 · ' + rechecks.length + ' 单</span></h3>' + table(rechecks, 'recheck') + '</div>' +
+    '<div class="card"><h3>📦 待发放 <span class="cnt">审批已通过 · ' + deliveries.length + ' 单</span></h3>' + table(deliveries, 'deliver') +
+    '<div class="hint">💡 标记已发放后，单据进入「待领取」状态，等待员工确认领取完成闭环。</div></div>';
+  document.getElementById('content').innerHTML = html;
+}
+
+/* ==================== 审批通用动作 ==================== */
+function approve(id, stage){
+  var r = DB.loadRequests().find(function(x){ return x.id === id; });
+  if(!r) return;
+  if(stage === 'first'){
+    if(r.level === 'small'){ r.status = 'pending_delivery'; r.logs.push({action:'初审通过（小额）', by:CU.name, role:'leader', comment:'', time:Date.now()}); }
+    else { r.status = 'pending_recheck'; r.logs.push({action:'初审通过', by:CU.name, role:'leader', comment:'', time:Date.now()}); }
+    toast('初审通过 ✓ ' + (r.level === 'small' ? '小额单据已转入待发放' : '已流转至分公司复审'));
+  } else if(stage === 'recheck'){
+    r.status = 'pending_delivery';
+    r.logs.push({action:'复审通过', by:CU.name, role:'branch_admin', comment:'', time:Date.now()});
+    toast('复审通过 ✓ 单据已转入待发放');
+  }
+  DB.saveRequest(r);
+  route(curPage);
+}
+var rejectTarget = null;
+function openReject(id){
+  rejectTarget = id;
+  document.getElementById('rejectReason').value = '';
+  openMask('maskReject');
+}
+function confirmReject(){
+  var reason = document.getElementById('rejectReason').value.trim();
+  if(!reason){ toast('驳回必须填写理由'); return; }
+  var r = DB.loadRequests().find(function(x){ return x.id === rejectTarget; });
+  if(!r) return;
+  var stageName = r.status === 'pending_review' ? '初审驳回' : '复审驳回';
+  r.status = 'rejected';
+  r.logs.push({action:stageName, by:CU.name, role:CU.role, comment:reason, time:Date.now()});
+  DB.saveRequest(r);
+  closeMask('maskReject');
+  toast('已驳回，员工可查看理由后修改重提');
+  route(curPage);
+}
+function markDelivered(id){
+  var r = DB.loadRequests().find(function(x){ return x.id === id; });
+  if(!r) return;
+  r.status = 'pending_receive';
+  r.logs.push({action:'已发放', by:CU.name, role:'branch_admin', comment:'', time:Date.now()});
+  DB.saveRequest(r);
+  toast('已标记发放，等待员工确认领取');
+  route(curPage);
+}
+function confirmReceive(id){
+  if(!confirm('确认已领取该单据物品？确认后本次申领完成闭环。')) return;
+  var r = DB.loadRequests().find(function(x){ return x.id === id; });
+  if(!r) return;
+  r.status = 'completed';
+  r.logs.push({action:'确认领取', by:CU.name, role:'employee', comment:'', time:Date.now()});
+  DB.saveRequest(r);
+  toast('领取确认完成，申领闭环 ✓');
+  route(curPage);
+}
+
+/* ==================== 驳回重提 ==================== */
+var resubmitId = null;
+function openResubmit(id){
+  resubmitId = id;
+  var r = DB.loadRequests().find(function(x){ return x.id === id; });
+  if(!r) return;
+  // 预填原物品数量
+  draft = { qtys:{}, purpose:r.purpose };
+  r.items.forEach(function(i){
+    var it = DB.loadItems().find(function(x){ return x.name === i.name; });
+    if(it) draft.qtys[it.id] = i.qty;
+  });
+  var items = DB.loadItems();
+  var rows = items.map(function(it){
+    var q = draft.qtys[it.id] || 0;
+    return '<div class="item-row"><div><div class="nm">' + esc(it.name) + ' <span style="color:var(--text-sec);font-weight:400">' + fmtMoney(it.price) + '/' + it.unit + '</span></div><div class="sp">' + esc(it.spec || '') + '</div></div>' +
+      '<div style="text-align:center"><input type="number" min="0" value="' + q + '" onchange="setQty(\'' + it.id + '\', this.value)"> <span style="font-size:12px;color:var(--text-sec)">' + it.unit + '</span></div>' +
+      '<div class="sub" id="sub-' + it.id + '">' + fmtMoney(it.price * q) + '</div></div>';
+  }).join('');
+  document.getElementById('detailBody').innerHTML = '<div class="kv"><span class="k">驳回理由</span><span style="color:var(--st-reject)">❌ ' + esc((r.logs.filter(function(l){return l.action.indexOf('驳回')>=0;}).pop()||{}).comment || '') + '</span></div>' +
+    '<h3 style="font-size:14px;margin-bottom:8px">✏️ 修改申领内容后重新提交（当前 v' + r.version + '）</h3>' +
+    '<div style="max-height:260px;overflow-y:auto;margin-bottom:6px">' + rows + '</div>' +
+    '<div class="sum-bar"><span>预估金额合计</span><b id="sumTotal2">¥0.00</b></div>' +
+    '<div class="frm-g"><label>用途说明（必填）</label><textarea class="txtarea" id="purpose2">' + esc(r.purpose) + '</textarea></div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-line" onclick="closeMask(\'maskDetail\')">取消</button><button class="btn btn-main" style="width:auto;padding:12px 32px" onclick="doResubmit()">重新提交</button></div>';
+  calcSum2();
+  openMask('maskDetail');
+}
+function calcSum2(){
+  var items = DB.loadItems(); var sum = 0;
+  items.forEach(function(it){ sum += (draft.qtys[it.id] || 0) * it.price; });
+  var el = document.getElementById('sumTotal2');
+  if(el) el.textContent = fmtMoney(sum);
+}
+function setQty2(id, v){ setQty(id, v); calcSum2(); }
+function doResubmit(){
+  var r = DB.loadRequests().find(function(x){ return x.id === resubmitId; });
+  if(!r) return;
+  var purpose = document.getElementById('purpose2').value.trim();
+  if(!purpose){ toast('请填写用途说明'); return; }
+  var items = DB.loadItems(); var sel = [];
+  items.forEach(function(it){ var q = draft.qtys[it.id] || 0; if(q > 0) sel.push({name:it.name, spec:it.spec, price:it.price, qty:q}); });
+  if(!sel.length){ toast('请至少选择一种物品'); return; }
+  var total = sel.reduce(function(s,i){ return s + i.price * i.qty; }, 0);
+  var th = DB.loadSettings().threshold;
+  r.items = sel; r.total = total; r.purpose = purpose;
+  r.status = 'pending_review'; r.level = total <= th ? 'small' : 'large';
+  r.version += 1;
+  r.logs.push({action:'修改重提（v' + r.version + '）', by:CU.name, role:'employee', comment:'', time:Date.now()});
+  DB.saveRequest(r);
+  closeMask('maskDetail');
+  toast('已重新提交，等待部门初审');
+  route(curPage);
+}
+/* ==================== 统计报表 ==================== */
+var repMonth = '';
+function reportData(scope){
+  var reqs = DB.loadRequests().filter(function(r){
+    if(['pending_receive','completed'].indexOf(r.status) < 0) return false;
+    if(scope === 'branch') return r.orgId === CU.orgId;
+    return true;
+  });
+  if(repMonth) reqs = reqs.filter(function(r){
+    var d = new Date(r.createdAt);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') === repMonth;
+  });
+  return reqs;
+}
+function monthOptions(){
+  var ms = {};
+  DB.loadRequests().forEach(function(r){
+    var d = new Date(r.createdAt);
+    ms[d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0')] = 1;
+  });
+  return Object.keys(ms).sort().reverse();
+}
+function renderReport(scope){
+  var reqs = reportData(scope);
+  var totalAmt = reqs.reduce(function(s,r){ return s + r.total; }, 0);
+  var totalCnt = reqs.length;
+
+  // 按人
+  var byUser = {};
+  reqs.forEach(function(r){
+    byUser[r.userName] = byUser[r.userName] || {n:0, amt:0, org:orgName(r.orgId), dept:deptName(r.deptId)};
+    byUser[r.userName].n++; byUser[r.userName].amt += r.total;
+  });
+  // 按部门
+  var byDept = {};
+  reqs.forEach(function(r){
+    var k = orgName(r.orgId) + '·' + deptName(r.deptId);
+    byDept[k] = byDept[k] || {n:0, amt:0};
+    byDept[k].n++; byDept[k].amt += r.total;
+  });
+  // 按公司（仅超管维度）
+  var byOrg = {};
+  if(scope === 'super'){
+    reqs.forEach(function(r){
+      byOrg[r.orgId] = byOrg[r.orgId] || {name:orgName(r.orgId), n:0, amt:0};
+      byOrg[r.orgId].n++; byOrg[r.orgId].amt += r.total;
+    });
+  }
+  // 按物品
+  var byItem = {};
+  reqs.forEach(function(r){
+    r.items.forEach(function(i){
+      byItem[i.name] = byItem[i.name] || {qty:0, amt:0};
+      byItem[i.name].qty += i.qty; byItem[i.name].amt += i.price * i.qty;
+    });
+  });
+  function toRows(map, keyName, valName){
+    return Object.keys(map).map(function(k){ return [k, map[k]]; }).sort(function(a,b){ return b[1].amt - a[1].amt; })
+      .map(function(x){ return '<div class="bar-row"><span title="' + esc(x[0]) + '" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(x[0]) + '</span><div class="bar-track"><div class="bar-fill" style="width:' + (totalAmt ? Math.max(2, Math.round(x[1].amt/totalAmt*100)) : 0) + '%"></div></div><span class="bar-val">' + fmtMoney(x[1].amt) + ' · ' + x[1].n + '单</span></div>'; }).join('') || '<div class="empty">暂无数据</div>';
+  }
+
+  var months = monthOptions();
+  var html =
+    '<div class="toolbar"><select id="repM"><option value="">全部月份</option>' +
+    months.map(function(m){ return '<option value="' + m + '"' + (repMonth === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') +
+    '</select><button class="btn btn-line" onclick="exportReportCSV(\'' + scope + '\')">📥 导出 CSV</button>' +
+    '<span style="font-size:13px;color:var(--text-sec)">统计口径：已发放 + 已完成' + (scope === 'branch' ? ' · 仅' + esc(orgName(CU.orgId)) : ' · 全部公司') + ' · 合计 ' + totalCnt + ' 单 / ' + fmtMoney(totalAmt) + '</span></div>' +
+    '<div class="rep-grid">' +
+    '<div class="card"><h3>👤 按人员</h3>' + toRows(byUser) + '</div>' +
+    '<div class="card"><h3>🏢 按部门</h3>' + toRows(byDept) + '</div>' +
+    (scope === 'super' ? '<div class="card"><h3>🏛 按公司</h3>' + (Object.keys(byOrg).map(function(k){ return [byOrg[k].name, byOrg[k]]; }).sort(function(a,b){ return b[1].amt - a[1].amt; }).map(function(x){ return '<div class="bar-row"><span>' + esc(x[0]) + '</span><div class="bar-track"><div class="bar-fill" style="width:' + (totalAmt ? Math.max(2, Math.round(x[1].amt/totalAmt*100)) : 0) + '%"></div></div><span class="bar-val">' + fmtMoney(x[1].amt) + ' · ' + x[1].n + '单</span></div>'; }).join('') || '<div class="empty">暂无数据</div>') + '</div>' : '') +
+    '<div class="card"><h3>📦 按物品</h3>' + (Object.keys(byItem).map(function(k){ return [k, byItem[k]]; }).sort(function(a,b){ return b[1].amt - a[1].amt; }).map(function(x){ return '<div class="bar-row"><span>' + esc(x[0]) + '</span><div class="bar-track"><div class="bar-fill" style="width:' + (totalAmt ? Math.max(2, Math.round(x[1].amt/totalAmt*100)) : 0) + '%"></div></div><span class="bar-val">' + fmtMoney(x[1].amt) + ' · ' + x[1].qty + '件</span></div>'; }).join('') || '<div class="empty">暂无数据</div>') + '</div>' +
+    '</div>';
+  document.getElementById('content').innerHTML = html;
+  document.getElementById('repM').onchange = function(){ repMonth = this.value; renderReport(scope); };
+}
+function exportReportCSV(scope){
+  var reqs = reportData(scope);
+  var rows = [['单号','申领人','公司','部门','物品明细','数量合计','金额','状态','用途','发放/完成时间']];
+  reqs.forEach(function(r){
+    var t = r.logs.filter(function(l){ return ['已发放','确认领取'].indexOf(l.action) >= 0; }).map(function(l){ return fmtTime(l.time); }).join('/');
+    rows.push([r.no, r.userName, orgName(r.orgId), deptName(r.deptId),
+      r.items.map(function(i){ return i.name + '×' + i.qty; }).join('、'),
+      r.items.reduce(function(s,i){ return s + i.qty; }, 0),
+      r.total, ST_TEXT[r.status], r.purpose, t]);
+  });
+  var fname = '办公用品报表_' + (scope === 'branch' ? orgName(CU.orgId) : '全集团') + '_' + (repMonth || '全部月份') + '.csv';
+  csvExport(rows, fname);
+  toast('已导出 ' + fname + '（' + reqs.length + ' 条记录）');
+}
+
+/* ==================== 超管：组织管理 ==================== */
+function renderOrgMgmt(){
+  var orgs = DB.loadOrgs();
+  var depts = DB.loadDepts();
+  var html = '<div class="card"><h3>🏛 分公司管理</h3><table class="tbl"><tr><th>名称</th><th>下属部门</th><th>状态</th><th style="width:100px">操作</th></tr>' +
+    orgs.map(function(o){
+      var ds = depts.filter(function(d){ return d.orgId === o.id; }).map(function(d){ return d.name; }).join('、');
+      return '<tr><td>' + esc(o.name) + '</td><td>' + esc(ds) + '</td><td>' + (o.status === 'active' ? '✅ 启用' : '⛔ 停用') + '</td>' +
+        '<td><button class="btn btn-danger" onclick="delOrg(\'' + o.id + '\')">删除</button></td></tr>';
+    }).join('') + '</table>' +
+    '<div class="frm-row" style="margin-top:14px"><div class="frm-g"><label>新增分公司名称</label><input id="newOrgName" placeholder="如：无锡分公司"></div>' +
+    '<div class="frm-g" style="display:flex;align-items:flex-end"><button class="btn btn-sm" onclick="addOrg()">＋ 添加分公司</button></div></div></div>' +
+    '<div class="card"><h3>🏢 部门管理</h3><table class="tbl"><tr><th>部门</th><th>所属公司</th><th style="width:100px">操作</th></tr>' +
+    depts.map(function(d){
+      return '<tr><td>' + esc(d.name) + '</td><td>' + esc(orgName(d.orgId)) + '</td><td><button class="btn btn-danger" onclick="delDept(\'' + d.id + '\')">删除</button></td></tr>';
+    }).join('') + '</table>' +
+    '<div class="frm-row" style="margin-top:14px"><div class="frm-g"><label>所属公司</label><select id="newDeptOrg">' + orgs.map(function(o){ return '<option value="' + o.id + '">' + esc(o.name) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="frm-g"><label>新增部门名称</label><input id="newDeptName" placeholder="如：财务部"></div>' +
+    '<div class="frm-g" style="display:flex;align-items:flex-end"><button class="btn btn-sm" onclick="addDept()">＋ 添加部门</button></div></div>' +
+    '<div class="hint">💡 组织架构为两级：分公司 → 部门。删除前请确认该组织下无用户与单据关联。</div></div>';
+  document.getElementById('content').innerHTML = html;
+}
+function addOrg(){
+  var n = document.getElementById('newOrgName').value.trim();
+  if(!n){ toast('请输入分公司名称'); return; }
+  var db = DB.ensure();
+  db.orgs.push({id:DB.newId('org'), name:n, status:'active'});
+  DB.write(db);
+  toast('分公司已添加'); renderOrgMgmt();
+}
+function delOrg(id){
+  var db = DB.ensure();
+  var used = db.users.some(function(u){ return u.orgId === id; }) || db.requests.some(function(r){ return r.orgId === id; });
+  if(used){ toast('该公司下存在用户或单据，无法删除'); return; }
+  if(!confirm('确认删除该分公司及其下属部门？')) return;
+  db.orgs = db.orgs.filter(function(o){ return o.id !== id; });
+  db.depts = db.depts.filter(function(d){ return d.orgId !== id; });
+  DB.write(db); toast('已删除'); renderOrgMgmt();
+}
+function addDept(){
+  var n = document.getElementById('newDeptName').value.trim();
+  var orgId = document.getElementById('newDeptOrg').value;
+  if(!n){ toast('请输入部门名称'); return; }
+  var db = DB.ensure();
+  db.depts.push({id:DB.newId('d'), orgId:orgId, name:n, status:'active'});
+  DB.write(db);
+  toast('部门已添加'); renderOrgMgmt();
+}
+function delDept(id){
+  var db = DB.ensure();
+  var used = db.users.some(function(u){ return u.deptId === id; }) || db.requests.some(function(r){ return r.deptId === id; });
+  if(used){ toast('该部门下存在用户或单据，无法删除'); return; }
+  if(!confirm('确认删除该部门？')) return;
+  db.depts = db.depts.filter(function(d){ return d.id !== id; });
+  DB.write(db); toast('已删除'); renderOrgMgmt();
+}
+
+/* ==================== 超管：用户管理 ==================== */
+function renderUserMgmt(){
+  var users = DB.loadUsers();
+  var orgs = DB.loadOrgs();
+  var depts = DB.loadDepts();
+  var html = '<div class="card"><h3>👥 用户管理 <span class="cnt">共 ' + users.length + ' 人</span></h3>' +
+    '<table class="tbl"><tr><th>姓名</th><th>账号</th><th>角色</th><th class="hide-m">公司</th><th class="hide-m">部门</th><th style="width:100px">操作</th></tr>' +
+    users.map(function(u){
+      return '<tr><td>' + esc(u.name) + '</td><td>' + esc(u.account) + '</td>' +
+        '<td><span class="tag-role">' + ROLE_TEXT[u.role] + '</span></td>' +
+        '<td class="hide-m">' + esc(u.orgId ? orgName(u.orgId) : '-') + '</td>' +
+        '<td class="hide-m">' + esc(u.deptId ? deptName(u.deptId) : '-') + '</td>' +
+        '<td><button class="btn btn-danger" onclick="delUser(\'' + u.id + '\')">删除</button></td></tr>';
+    }).join('') + '</table>' +
+    '<h3 style="font-size:14px;margin-top:18px">➕ 新增用户</h3>' +
+    '<div class="frm-row">' +
+    '<div class="frm-g"><label>姓名</label><input id="nuName" placeholder="真实姓名"></div>' +
+    '<div class="frm-g"><label>账号</label><input id="nuAcct" placeholder="登录账号"></div>' +
+    '<div class="frm-g"><label>密码</label><input id="nuPwd" placeholder="初始密码"></div>' +
+    '<div class="frm-g"><label>角色</label><select id="nuRole">' +
+    '<option value="employee">员工</option><option value="leader">部门负责人</option>' +
+    '<option value="branch_admin">分公司管理员</option><option value="super_admin">集团超管</option></select></div>' +
+    '<div class="frm-g"><label>所属公司</label><select id="nuOrg" onchange="fillDeptSel()">' +
+    '<option value="">（超管无需）</option>' + orgs.map(function(o){ return '<option value="' + o.id + '">' + esc(o.name) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="frm-g"><label>所属部门</label><select id="nuDept"></select></div>' +
+    '</div><button class="btn btn-sm" onclick="addUser()">＋ 创建用户</button>' +
+    '<div class="hint">💡 一个用户一个角色。分公司管理员归属公司级（无需选部门）；员工与部门负责人需指定公司+部门。</div></div>';
+  document.getElementById('content').innerHTML = html;
+  fillDeptSel();
+}
+function fillDeptSel(){
+  var orgId = document.getElementById('nuOrg').value;
+  var depts = DB.loadDepts().filter(function(d){ return d.orgId === orgId; });
+  document.getElementById('nuDept').innerHTML = depts.map(function(d){ return '<option value="' + d.id + '">' + esc(d.name) + '</option>'; }).join('') || '<option value="">（该公司暂无部门）</option>';
+}
+function addUser(){
+  var u = {
+    id: DB.newId('u'),
+    name: document.getElementById('nuName').value.trim(),
+    account: document.getElementById('nuAcct').value.trim(),
+    pwd: document.getElementById('nuPwd').value.trim() || '123456',
+    role: document.getElementById('nuRole').value,
+    orgId: document.getElementById('nuOrg').value,
+    deptId: document.getElementById('nuDept').value,
+    status: 'active'
+  };
+  if(!u.name || !u.account){ toast('姓名与账号必填'); return; }
+  if(DB.loadUsers().some(function(x){ return x.account === u.account; })){ toast('账号已存在'); return; }
+  if((u.role === 'employee' || u.role === 'leader') && !u.orgId){ toast('该角色需指定公司'); return; }
+  DB.saveUser(u);
+  toast('用户已创建：' + u.name); renderUserMgmt();
+}
+function delUser(id){
+  var u = DB.loadUsers().find(function(x){ return x.id === id; });
+  if(u && u.id === CU.id){ toast('不能删除当前登录账号'); return; }
+  if(!confirm('确认删除用户「' + (u ? u.name : '') + '」？')) return;
+  var db = DB.ensure();
+  db.users = db.users.filter(function(x){ return x.id !== id; });
+  DB.write(db); toast('已删除'); renderUserMgmt();
+}
+
+/* ==================== 超管：物品管理 ==================== */
+function renderItemMgmt(){
+  var items = DB.ensure().items;
+  var html = '<div class="card"><h3>📦 物品清单 <span class="cnt">共 ' + items.length + ' 种</span></h3>' +
+    '<table class="tbl"><tr><th>名称</th><th>规格</th><th>单价</th><th>单位</th><th>状态</th><th style="width:140px">操作</th></tr>' +
+    items.map(function(it){
+      return '<tr><td>' + esc(it.name) + '</td><td class="hide-m">' + esc(it.spec || '-') + '</td><td class="money">' + fmtMoney(it.price) + '</td><td>' + esc(it.unit) + '</td>' +
+        '<td>' + (it.status === 'active' ? '✅ 启用' : '⛔ 停用') + '</td>' +
+        '<td>' + (it.status === 'active'
+          ? '<button class="btn btn-line" style="padding:5px 10px;font-size:12px" onclick="toggleItem(\'' + it.id + '\')">停用</button>'
+          : '<button class="btn btn-sm" style="padding:5px 10px;font-size:12px" onclick="toggleItem(\'' + it.id + '\')">启用</button>') + '</td></tr>';
+    }).join('') + '</table>' +
+    '<h3 style="font-size:14px;margin-top:18px">➕ 新增物品</h3>' +
+    '<div class="frm-row">' +
+    '<div class="frm-g"><label>名称（必填）</label><input id="niName" placeholder="如：荧光笔"></div>' +
+    '<div class="frm-g"><label>规格</label><input id="niSpec" placeholder="如：黄色"></div>' +
+    '<div class="frm-g"><label>单价（元，必填）</label><input id="niPrice" type="number" min="0" step="0.1" placeholder="0.0"></div>' +
+    '<div class="frm-g"><label>单位</label><input id="niUnit" placeholder="支/本/盒…"></div>' +
+    '</div><button class="btn btn-sm" onclick="addItem()">＋ 添加物品</button>' +
+    '<div class="hint">💡 停用物品不再出现在申领清单，但历史单据与报表不受影响（提交时已做价格快照）。</div></div>';
+  document.getElementById('content').innerHTML = html;
+}
+function addItem(){
+  var it = {
+    id: DB.newId('i'),
+    name: document.getElementById('niName').value.trim(),
+    spec: document.getElementById('niSpec').value.trim(),
+    price: parseFloat(document.getElementById('niPrice').value) || 0,
+    unit: document.getElementById('niUnit').value.trim() || '个',
+    status: 'active'
+  };
+  if(!it.name || it.price <= 0){ toast('名称与有效单价必填'); return; }
+  DB.saveItem(it);
+  toast('物品已添加'); renderItemMgmt();
+}
+function toggleItem(id){
+  var db = DB.ensure();
+  var it = db.items.find(function(x){ return x.id === id; });
+  if(!it) return;
+  it.status = it.status === 'active' ? 'disabled' : 'active';
+  DB.write(db);
+  toast(it.status === 'active' ? '已启用' : '已停用（不再出现在申领清单）');
+  renderItemMgmt();
+}
+
+/* ==================== 超管：审批规则 ==================== */
+function renderRuleMgmt(){
+  var s = DB.loadSettings();
+  document.getElementById('content').innerHTML =
+    '<div class="card"><h3>⚙️ 按金额分级审批规则</h3>' +
+    '<div class="frm-row"><div class="frm-g"><label>小额审批阈值（元）</label><input id="thVal" type="number" min="0" value="' + s.threshold + '"></div>' +
+    '<div class="frm-g" style="display:flex;align-items:flex-end"><button class="btn btn-sm" onclick="saveRule()">保存配置</button></div></div>' +
+    '<div class="hint">📌 当前规则：<br>• 申领单金额 ≤ <b>' + fmtMoney(s.threshold) + '</b>：走<b>简化链</b>（部门初审 → 待发放）<br>' +
+    '• 申领单金额 > <b>' + fmtMoney(s.threshold) + '</b>：走<b>完整链</b>（部门初审 → 分公司复审 → 待发放）<br>' +
+    '• 修改阈值仅影响之后提交的新单据，已提交单据的审批级别保持不变。</div></div>';
+}
+function saveRule(){
+  var v = parseFloat(document.getElementById('thVal').value);
+  if(isNaN(v) || v < 0){ toast('请输入有效金额'); return; }
+  var s = DB.loadSettings();
+  s.threshold = v;
+  DB.saveSettings(s);
+  toast('阈值已更新为 ' + fmtMoney(v));
+  renderRuleMgmt();
+}
+
+/* ==================== 初始化 ==================== */
+(function init(){
+  DB.ensure();
+  var uid = sessionStorage.getItem('supplies_uid');
+  if(uid){
+    var u = DB.loadUsers().find(function(x){ return x.id === uid; });
+    if(u){
+      document.getElementById('loginAccount').value = u.account;
+      document.getElementById('loginPwd').value = u.pwd;
+      doLogin();
+      return;
+    }
+  }
+  document.getElementById('page-login').style.display = 'flex';
+})();
+</script>
+</body>
+</html>
